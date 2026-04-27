@@ -121,9 +121,13 @@ const birdIllustrations: Record<string, React.FC<{ className?: string }>> = {
     'default': ({ className }) => (<svg viewBox="0 0 100 100" className={className}><g transform="translate(5, 5) scale(0.9)"><path d="M 50,30 C 25,30 20,60 45,85 C 50,90 70,90 75,85 C 100,60 95,30 70,30 C 65,25 55,25 50,30 Z" fill={"#a1a1aa"} stroke="#1a202c" strokeWidth="2"/><circle cx="35" cy="35" r="15" fill={"#a1a1aa"} stroke="#1a202c" strokeWidth="2"/><circle cx="32" cy="32" r="3" fill="#1a202c"/><path d="M 20,33 C 15,30 15,40 20,37 L 25,35 Z" fill="orange" stroke="#1a202c" strokeWidth="1.5"/></g></svg>),
 };
 
-export const SpeciesIllustration: React.FC<{ className?: string; name: string }> = ({ className, name }) => {
+export const SpeciesIllustration: React.FC<{ className?: string; name: string; style?: React.CSSProperties }> = ({ className, name, style }) => {
     const Illustration = birdIllustrations[name] || birdIllustrations['default'];
-    return <Illustration className={className} />;
+    return (
+        <div className={className} style={style}>
+            <Illustration className="w-full h-full" />
+        </div>
+    );
 };
 
 // Fix: Export the SceneryColors interface to allow for strong typing of color configuration objects.

@@ -1,7 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Bird } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+let genAI: GoogleGenAI | null = null;
+
+function getGenAI(): GoogleGenAI {
+    if (!genAI) {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            throw new Error("GEMINI_API_KEY is not set in the environment.");
+        }
+        genAI = new GoogleGenAI({ apiKey });
+    }
+    return genAI;
+}
 
 const birdInfoSchema = {
     type: Type.OBJECT,
@@ -19,11 +30,12 @@ const birdInfoSchema = {
 };
 
 export const identifyBird = async (bird: Bird): Promise<{ description: string; fact: string; }> => {
+    const ai = getGenAI();
     const prompt = `당신은 한국 조류학 전문가입니다. 한 플레이어가 '${bird.name}'을(를) 발견했습니다. 이 새의 실제 특징과 생태에 대한 간략한 설명과, 아이들이 이해하기 쉬운 흥미로운 사실 한 가지를 한국어로 생성해주세요. 게임에 어울리게 가볍고 매력적인 톤을 유지해주세요.`;
 
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3-flash-preview",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -32,7 +44,11 @@ export const identifyBird = async (bird: Bird): Promise<{ description: string; f
             },
         });
         
-        const jsonText = response.text.trim();
+        const text = response.text;
+        if (!text) {
+            throw new Error("AI로부터 응답 텍스트를 받지 못했습니다.");
+        }
+        const jsonText = text.trim();
         const identifiedData = JSON.parse(jsonText);
 
         if (identifiedData.description && identifiedData.fact) {

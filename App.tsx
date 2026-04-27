@@ -549,6 +549,32 @@ const App: React.FC = () => {
         setSwarovskiZoom(prev => Math.max(prev - SWAROVSKI_ZOOM_STEP, SWAROVSKI_MIN_ZOOM));
     };
 
+    const handleDownloadLog = () => {
+        const data = {
+            gameName: "Gemini Birdwatcher",
+            playerName: "탐조인",
+            score,
+            foundBirdsCount: Object.keys(foundBirds).length,
+            foundBirds: Object.values(foundBirds).map(b => ({
+                name: b.name,
+                rarity: translateRarity(b.rarity),
+                description: b.description,
+                fact: b.fact
+            })),
+            timestamp: new Date().toLocaleString('ko-KR')
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `birding_report_${new Date().getTime()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showTemporaryToast("탐조 기록이 다운로드되었습니다.");
+    };
+
     useEffect(() => {
         const newMissions = missions.map(mission => {
             if (mission.isCompleted) return mission;
@@ -724,7 +750,13 @@ const App: React.FC = () => {
             <div className="w-full h-screen p-4 sm:p-8 bg-slate-800 text-white flex flex-col">
                  <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
                     <h2 className="text-3xl sm:text-4xl font-bold">탐조 기록장 ({sortedFoundBirds.length}/{totalBirds}종)</h2>
-                    <button onClick={() => setGameState('playing')} className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded">게임으로 돌아가기</button>
+                    <div className="flex gap-2">
+                        <button onClick={handleDownloadLog} className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            <span>기록 다운로드</span>
+                        </button>
+                        <button onClick={() => setGameState('playing')} className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded">게임으로 돌아가기</button>
+                    </div>
                 </div>
                 {sortedFoundBirds.length === 0 ? (
                      <p className="text-center text-xl text-slate-400 mt-8">아직 발견한 새가 없습니다. 탐조를 시작해보세요!</p>
@@ -759,7 +791,13 @@ const App: React.FC = () => {
             <div className="w-full h-screen p-4 sm:p-8 bg-slate-800 text-white flex flex-col">
                 <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
                     <h2 className="text-3xl sm:text-4xl font-bold">탐조 도감 ({foundCount}/{totalBirds}종 발견)</h2>
-                    <button onClick={() => setGameState('playing')} className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded">게임으로 돌아가기</button>
+                    <div className="flex gap-2">
+                        <button onClick={handleDownloadLog} className="flex items-center gap-2 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 px-4 rounded transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            <span>도감 다운로드</span>
+                        </button>
+                        <button onClick={() => setGameState('playing')} className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-4 rounded">게임으로 돌아가기</button>
+                    </div>
                 </div>
                 <div className="flex-1 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 overflow-y-auto pr-2">
                     {allBirds.map(bird => {
